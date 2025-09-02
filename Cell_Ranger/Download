@@ -1,0 +1,7 @@
+ ```bash
+#It needs Linux (CentOS or Ubuntu) or WSL 
+#Link: https://www.10xgenomics.com/support/software/cell-ranger/downloads
+# To install with curl: 
+curl -o cellranger-9.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.1.tar.gz?Expires=1756849974&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=m5hvSvJqKdCvqTrdXcc8dT40VteZxFHznOOz2noOwbhrIPuOjtsQJJq6ewVP6WQUAPCB~~UUjGFGfNIQZtyRqVcL0MvLr9f9W7JWCBa9viHAhbo7~wwVdijF21O7eKLxntxsBYLMkz4-nGegZqjo~QS9-5R3CvTBMtClGGXJcEG6C52zHiZHBZX6qtS0DeBGKTNWegFGHqAShR08eVEikrxbX6-okGf88NM6kPhal~Cv5~0Qt0EGCYjNkqu75DUKdqbFIukPifSsmk3YvbhQ6tbGwtEKPVQZ7nbVZqZnDES8FXtgPhQnyNcXiTeBgJBgCCNfgSvy~w6BF4t4fTuzLw__"
+#To install with wget: 
+wget -O cellranger-9.0.1.tar.gz "https://cf.10xgenomics.com/releases/cell-exp/cellranger-9.0.1.tar.gz?Expires=1756849974&Key-Pair-Id=APKAI7S6A5RYOXBWRPDA&Signature=m5hvSvJqKdCvqTrdXcc8dT40VteZxFHznOOz2noOwbhrIPuOjtsQJJq6ewVP6WQUAPCB~~UUjGFGfNIQZtyRqVcL0MvLr9f9W7JWCBa9viHAhbo7~wwVdijF21O7eKLxntxsBYLMkz4-nGegZqjo~QS9-5R3CvTBMtClGGXJcEG6C52zHiZHBZX6qtS0DeBGKTNWegFGHqAShR08eVEikrxbX6-okGf88NM6kPhal~Cv5~0Qt0EGCYjNkqu75DUKdqbFIukPifSsmk3YvbhQ6tbGwtEKPVQZ7nbVZqZnDES8FXtgPhQnyNcXiTeBgJBgCCNfgSvy~w6BF4t4fTuzLw__"
