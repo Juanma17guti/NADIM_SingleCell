@@ -1,0 +1,174 @@
+```r
+
+# =========================
+# FUNCTIONS
+# =========================
+
+# Function to run GSEA and save results (example)
+run_gsea_example <- function(marker_table, plot_title = "Example") {
+  # Create ranked gene list
+  gene_ranks <- marker_table$avg_log2FC
+  names(gene_ranks) <- rownames(marker_table)
+  gene_ranks <- sort(gene_ranks, decreasing = TRUE)
+  
+  # Run GSEA
+  gsea_result <- gseGO(
+    geneList = gene_ranks,
+    OrgDb = org.Hs.eg.db,
+    keyType = "SYMBOL",
+    ont = "BP",
+    pAdjustMethod = "fdr",
+    pvalueCutoff = 0.05,
+    verbose = FALSE
+  )
+  
+  # Count number of enriched genes
+  gsea_result@result$n_genes_enriched <- ifelse(
+    is.na(gsea_result@result$core_enrichment) | gsea_result@result$core_enrichment == "",
+    0,
+    stringr::str_count(gsea_result@result$core_enrichment, "/") + 1
+  )
+  
+  # Save results as CSV (example path)
+  csv_file <- paste0("C://Path/To/CSV/", plot_title, ".csv")
+  write.csv(gsea_result@result, file = csv_file, row.names = FALSE)
+  
+  # Create and save dotplot
+  dot_plot <- dotplot(gsea_result, x = "NES", showCategory = 15) +
+    scale_size_area(max_size = 25) +
+    ggtitle(plot_title) +
+    theme_minimal()
+  
+  ggsave(
+    filename = paste0(plot_title, ".png"),
+    plot = dot_plot,
+    path = "C://Path/To/Plots/GSEA/",
+    units = "in",
+    width = 10,
+    height = 12,
+    dpi = 300
+  )
+}
+
+# Function to create and save a volcano plot (example)
+plot_volcano_example <- function(marker_table, plot_title = "Example") {
+  # Define colors based on logFC and adjusted p-value
+  colors <- ifelse(
+    marker_table$avg_log2FC < -0.5 & marker_table$p_val_adj < 0.05, "blue",
+    ifelse(marker_table$avg_log2FC > 0.5 & marker_table$p_val_adj < 0.05, "red", "grey")
+  )
+  
+  colors[is.na(colors)] <- "grey"
+  names(colors) <- rep("Not significant", length(colors))
+  names(colors)[colors == "red"] <- "Upregulated"
+  names(colors)[colors == "blue"] <- "Downregulated"
+  
+  # Generate volcano plot
+  volcano_plot <- EnhancedVolcano(
+    marker_table,
+    lab = rownames(marker_table),
+    x = "avg_log2FC",
+    y = "p_val_adj",
+    colCustom = colors,
+    pCutoff = 0.05,
+    FCcutoff = 0.5,
+    title = plot_title
+  )
+  
+  # Save plot (example path)
+  file_name <- paste0(gsub("[^A-Za-z0-9_\\-]", "_", plot_title), ".png")
+  file_path <- file.path("C:/Path/To/Plots/Volcano", file_name)
+  ggsave(filename = file_path, plot = volcano_plot, width = 8, height = 6, dpi = 300)
+}
+
+# =========================
+# DATA PROCESSING EXAMPLE
+# =========================
+
+# Example: subset a cell type (generic)
+example_cells <- subset(Example_Sobj, subset = Cell_Type %in% c("TypeA", "TypeB"))
+
+# Normalize and scale (SCTransform)
+example_cells_sct <- SCTransform(example_cells, verbose = FALSE)
+
+# Prepare for marker detection
+example_cells_sct <- PrepSCTFindMarkers(example_cells_sct)
+
+# Example marker detection between groups (generic)
+markers_example <- FindMarkers(
+  example_cells_sct,
+  ident.1 = "Group1",
+  ident.2 = "Group2",
+  group.by = "Condition"
+)
+
+# Run GSEA and volcano plot (generic)
+run_gsea_example(markers_example, "Example_GSEA")
+plot_volcano_example(markers_example, "Example_Volcano")
+
+# =========================
+# CELL COUNTS AND PERCENTAGES EXAMPLE
+# =========================
+
+# Summarize cell counts per sample (generic)
+df_cell_summary <- Example_Sobj@meta.data %>%
+  group_by(SampleID, Condition, Response, Cell_Type) %>%
+  summarise(n_cells = n()) %>%
+  pivot_wider(
+    names_from = Cell_Type,
+    values_from = n_cells,
+    values_fill = 0
+  ) %>%
+  mutate(
+    TOTAL_BCELLS = rowSums(across(c("TypeA", "TypeB", "TypeC", "TypeD"))),
+    MEMORY_CELLS = rowSums(across(c("TypeA", "TypeB")))
+  )
+
+# Calculate total cells per sample (generic)
+total_cells <- Example_Sobj@meta.data %>%
+  group_by(SampleID, Condition, Response) %>%
+  summarise(TOTAL_CELLS = n(), .groups = "drop")
+
+# Merge totals
+df_cell_summary <- df_cell_summary %>%
+  left_join(total_cells, by = c("SampleID", "Condition", "Response")) %>%
+  mutate(
+    BCELL_PERCENT = (TOTAL_BCELLS / TOTAL_CELLS) * 100,
+    TYPEA_PERCENT = (TypeA / TOTAL_CELLS) * 100,
+    MEMORY_PERCENT = (MEMORY_CELLS / TOTAL_CELLS) * 100,
+    TYPEA_B = (TypeA / TOTAL_BCELLS) * 100,
+    MEMORY_B = (MEMORY_CELLS / TOTAL_BCELLS) * 100
+  )
+
+# Save as TSV
+write.table(
+  df_cell_summary,
+  file = "C://Path/To/Output/df_cell_summary_example.tsv",
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE
+)
+
+# =========================
+# UMAP DATA EXPORT EXAMPLE
+# =========================
+
+# Summarize cells for UMAP (generic)
+df_umap_cells <- Example_Sobj@meta.data %>%
+  group_by(SampleID, Condition, Response, Cell_Type) %>%
+  summarise(n_cells = n()) %>%
+  pivot_wider(
+    names_from = Cell_Type,
+    values_from = n_cells,
+    values_fill = 0
+  ) %>%
+  mutate(MEMORY_CELLS = TypeA + TypeB)
+
+# Save UMAP tables
+write.table(
+  df_umap_cells,
+  file = "C://Path/To/Output/df_umap_cells_example.tsv",
+  sep = "\t",
+  row.names = FALSE,
+  quote = FALSE
+)
