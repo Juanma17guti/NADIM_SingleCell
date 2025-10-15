@@ -1,12 +1,6 @@
 ```R
 
 # -----------------------------
-# Load libraries
-# -----------------------------
-library(Seurat)
-library(stringr)
-
-# -----------------------------
 # Initialize list to store Seurat objects for all samples
 # -----------------------------
 seurat_list <- list()
