@@ -32,7 +32,7 @@ Sobj_SINGLET_FIL <- SCTransform(
 )
 
 # -----------------------------
-# Dimensionality Reduction
+# Dimensionality Reduction and Harmony
 # -----------------------------
 Sobj_SINGLET_FIL <- RunPCA(
   Sobj_SINGLET_FIL,
@@ -43,10 +43,16 @@ Sobj_SINGLET_FIL <- RunPCA(
 ElbowPlot(Sobj_SINGLET_FIL, ndims = 30)
 NPCs <- 10  # Number of PCs to use downstream
 
+Sobj_SINGLET_FIL <- RunHarmony(
+  object = Sobj_SINGLET_FIL,
+  group.by.vars = "Sample", 
+  dims.use = 1:NPCs
+)
+
 # -----------------------------
 # Clustering
 # -----------------------------
-Sobj_SINGLET_FIL <- FindNeighbors(Sobj_SINGLET_FIL, dims = 1:NPCs)
+Sobj_SINGLET_FIL <- FindNeighbors(Sobj_SINGLET_FIL, dims = 1:NPCs, reduction = "harmony")
 Sobj_SINGLET_FIL <- FindClusters(
   Sobj_SINGLET_FIL,
   random.seed = 1,
@@ -57,7 +63,7 @@ Sobj_SINGLET_FIL <- FindClusters(
 # -----------------------------
 # UMAP Visualization
 # -----------------------------
-Sobj_SINGLET_FIL <- RunUMAP(Sobj_SINGLET_FIL, dims = 1:NPCs)
+Sobj_SINGLET_FIL <- RunUMAP(Sobj_SINGLET_FIL, dims = 1:NPCs, reduction = "harmony")
 
 DimPlot(
   Sobj_SINGLET_FIL,
