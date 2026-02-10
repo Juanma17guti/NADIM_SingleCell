@@ -21,7 +21,7 @@ Sobj_BCELL <- SCTransform(
 )                          
 
 # -----------------------------
-# 3. Dimensionality Reduction
+# 3. Dimensionality Reduction and Harmony
 # -----------------------------
 # Run PCA using variable features
 Sobj_BCELL <- RunPCA(
@@ -33,11 +33,16 @@ Sobj_BCELL <- RunPCA(
 ElbowPlot(Sobj_BCELL, ndims = 30)
 y <- 7  # Number of PCs to use
 
+Sobj_BCELL <- RunHarmony(
+  object = Sobj_BCELL,
+  group.by.vars = "Sample", 
+  dims.use = 1:y
+)
 # -----------------------------
 # 4. Clustering and Embedding
 # -----------------------------
 # Build KNN graph and perform clustering (Leiden algorithm)
-Sobj_BCELL <- FindNeighbors(Sobj_BCELL, dims = 1:y)
+Sobj_BCELL <- FindNeighbors(Sobj_BCELL, dims = 1:y, reduction = "harmony")
 Sobj_BCELL <- FindClusters(
   Sobj_BCELL, 
   random.seed = 1, 
@@ -46,7 +51,7 @@ Sobj_BCELL <- FindClusters(
 )
 
 # Run UMAP for visualization
-Sobj_BCELL <- RunUMAP(Sobj_BCELL, dims = 1:y)
+Sobj_BCELL <- RunUMAP(Sobj_BCELL, dims = 1:y, reduction = "harmony")
 
 # UMAP plot colored by Seurat clusters
 DimPlot(Sobj_BCELL, group.by = "seurat_clusters", pt.size = 1) +
